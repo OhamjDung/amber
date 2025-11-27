@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Date Quiz</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Pixel Font -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+        }
+        
+        .pixel-box {
+            box-shadow: 
+                -4px 0 0 0 white,
+                4px 0 0 0 white,
+                0 -4px 0 0 white,
+                0 4px 0 0 white;
+        }
+        
+        .pixel-btn {
+            box-shadow: 
+                -2px 0 0 0 black,
+                2px 0 0 0 black,
+                0 -2px 0 0 black,
+                0 2px 0 0 black,
+                2px 2px 0 0 rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        
+        .pixel-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+        
+        .selection-pink::selection {
+            background-color: #ec4899;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4 selection-pink">
+
+    <div class="w-full max-w-5xl">
+        <!-- Game Container -->
+        <div class="bg-[#8b9bb4] p-2 pixel-box">
+            <div class="bg-[#c7dcd0] border-4 border-slate-700 min-h-[500px] flex flex-col md:flex-row items-center p-6 gap-8">
+                
+                <!-- LEFT COLUMN: ILLUSTRATION AREA -->
+                <div id="illustration-area" class="w-full md:w-1/2 aspect-video bg-slate-800/5 border-4 border-slate-600/20 border-dashed rounded-lg flex flex-col items-center justify-center relative overflow-hidden shadow-inner">
+                    <div class="text-center p-6 z-10">
+                        <i data-lucide="image" class="mx-auto mb-2 text-slate-400 w-12 h-12"></i>
+                        <p class="text-slate-600 font-bold text-2xl uppercase tracking-widest opacity-75">Illustration<br/>Goes Here</p>
+                        <p class="text-slate-500 text-lg mt-2 opacity-50">(Add your image code)</p>
+                    </div>
+                    
+                    <!-- Dynamic Background Icon -->
+                    <div id="bg-icon-container" class="absolute inset-0 opacity-5 flex items-center justify-center pointer-events-none">
+                        <!-- Icon injected by JS -->
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: GAME CONTENT -->
+                <div id="game-content" class="w-full md:w-1/2 flex flex-col justify-center items-center text-center space-y-8">
+                    <!-- Content injected by JS -->
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="text-center mt-4 text-slate-500 text-xl opacity-50">
+            PRESS START TO SELECT • A/B BUTTON
+        </div>
+    </div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const state = {
+            step: 0,
+            path: null,    // 'indoors' | 'outdoors'
+            activity: null // 'sit' | 'walk' | 'fight'
+        };
+
+        // --- LOGIC ---
+        function getResult() {
+            if (state.path === 'indoors') {
+                if (state.activity === 'sit') return {
+                    title: "The Cozy Gamer Cave",
+                    desc: "You chose maximum comfort and safety.",
+                    ideas: ["Minecraft Date Night", "FNAF Movie or JJK Movie"]
+                };
+                if (state.activity === 'walk') return {
+                    title: "The Creative Explorer",
+                    desc: "You want to move, but stay warm.",
+                    ideas: ["Museum Date", "Ice Cream + Painting + Video Essay"]
+                };
+                if (state.activity === 'fight') return {
+                    title: "The Indoor Party Animal",
+                    desc: "You have energy to burn, but refuse to freeze.",
+                    ideas: ["Mexican Dance Learning", "Karaoke Night"]
+                };
+            } else { // Outdoors
+                if (state.activity === 'sit') return {
+                    title: "The Brave Picnic",
+                    desc: "You are brave enough to face the cold for vibes.",
+                    ideas: ["Winter Picnic At The Park", "Ice Cream + Painting + Video Essay"]
+                };
+                if (state.activity === 'walk') return {
+                    title: "The Frosty Stroller",
+                    desc: "A romantic walk, hands in pockets.",
+                    ideas: ["Walking Around the Park", "Undecided / Cafe Hop"]
+                };
+                if (state.activity === 'fight') return {
+                    title: "The Elemental Champion",
+                    desc: "You want to heat up by moving fast!",
+                    ideas: ["Volleyball Date", "Kids Playground (Heights/Arapaho)", "Tennis"]
+                };
+            }
+            return { title: "The Mystery", desc: "Something went wrong in the dream space!", ideas: [] };
+        }
+
+        // --- ACTIONS ---
+        function nextStep() {
+            state.step++;
+            render();
+        }
+
+        function setPath(p) {
+            state.path = p;
+            nextStep();
+        }
+
+        function setActivity(a) {
+            state.activity = a;
+            nextStep();
+        }
+
+        function restart() {
+            state.step = 0;
+            state.path = null;
+            state.activity = null;
+            render();
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function updateIllustration() {
+            const container = document.getElementById('illustration-area');
+            
+            // Background Icon
+            let iconName = 'sun';
+            if (state.step === 1) iconName = 'snowflake';
+            if (state.step === 2) iconName = 'heart';
+            if (state.step === 3) iconName = 'house';
+            const bgIcon = `<div class="absolute inset-0 opacity-5 flex items-center justify-center pointer-events-none"><i data-lucide="${iconName}" class="w-48 h-48"></i></div>`;
+
+            // Main Image
+            let content = '';
+            if (state.step === 0) {
+                content = `<img src="assets/iceking_homepage.png" class="w-full h-full object-cover opacity-90 animate-fade-in" alt="Ice King">`;
+            } 
+            else if (state.step === 1) {
+                content = `
+                    <div class="flex flex-col w-full h-full items-center justify-center gap-2 animate-slide-in">
+                        <img src="assets/jakevsfinn.png" class="w-full h-full object-contain drop-shadow-lg animate-fade-in" alt="Jake">
+                    </div>
+                `;
+            }
+            else if (state.step === 2) {
+                const partner = state.path === 'indoors' ? 'jake' : 'finn'; 
+                content = `<img src="assets/${partner}/${partner}_hide.png" class="w-full h-full object-contain drop-shadow-lg animate-fade-in" alt="${partner}">`;
+            }
+            else if (state.step === 3) {
+                const partner = state.path === 'indoors' ? 'jake' : 'finn';
+                let action = 'talk';
+                if (state.activity === 'walk') action = 'walktalk';
+                if (state.activity === 'fight') action = 'fighting';
+                
+                content = `<img src="assets/${partner}/${partner}_${action}.png" class="w-full h-full object-contain drop-shadow-lg animate-fade-in" alt="${partner} ${action}">`;
+            }
+
+            container.innerHTML = content + bgIcon;
+        }
+
+        function render() {
+            const container = document.getElementById('game-content');
+            updateIllustration();
+            
+            let html = '';
+
+            // STEP 0: INTRO
+            if (state.step === 0) {
+                html = `
+                    <div class="animate-fade-in w-full">
+                        <h1 class="text-5xl mb-6 text-slate-900 drop-shadow-md">ADVENTURE QUEST</h1>
+                        <p class="text-2xl mb-8 text-slate-700">A weird dream is starting...</p>
+                        <button onclick="nextStep()" class="pixel-btn w-full bg-pink-400 hover:bg-pink-300 text-white text-3xl px-8 py-4 cursor-pointer">
+                            START GAME
+                        </button>
+                    </div>
+                `;
+            }
+
+            // STEP 1: CHASE
+            else if (state.step === 1) {
+                html = `
+                    <div class="w-full animate-slide-in">
+                        <div class="mb-6">
+                            <img src="https://media1.tenor.com/m/X_33K4_TfAsAAAAC/adventure-time-gunter.gif" alt="Penguin" class="w-16 mx-auto mb-4 opacity-75 mix-blend-multiply" />
+                            <p class="text-2xl leading-relaxed text-slate-900">
+                                The <span class="text-blue-600 font-bold">ICE KING</span> is chasing you! <br/>
+                                The cold is biting at your skin.
+                            </p>
+                            <p class="text-xl mt-4 text-slate-600 italic blink">What do you do?!</p>
+                        </div>
+
+                        <div class="grid gap-4 w-full">
+                            <button onclick="setPath('indoors')" class="pixel-btn bg-amber-200 hover:bg-amber-100 text-amber-900 text-xl p-3 flex items-center justify-center gap-3">
+                                <i data-lucide="house" class="w-5 h-5"></i>
+                                Run Indoors (Jake)
+                            </button>
+                            
+                            <button onclick="setPath('outdoors')" class="pixel-btn bg-blue-300 hover:bg-blue-200 text-blue-900 text-xl p-3 flex items-center justify-center gap-3">
+                                <i data-lucide="snowflake" class="w-5 h-5"></i>
+                                Go Outside (Finn)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // STEP 2: VIBE
+            else if (state.step === 2) {
+                const partner = state.path === 'indoors' ? 'Jake' : 'Finn';
+                html = `
+                    <div class="w-full animate-slide-in">
+                        <p class="text-2xl mb-6 leading-relaxed text-slate-900">
+                            You escaped with <span class="font-bold text-pink-600">${partner}</span>! <br/>
+                            <span class="text-xl text-slate-600 mt-2 block">What's the vibe now?</span>
+                        </p>
+
+                        <div class="grid gap-3 w-full">
+                            <button onclick="setActivity('sit')" class="pixel-btn bg-green-200 hover:bg-green-100 text-green-900 text-xl p-3 flex items-center gap-3 text-left">
+                                <div class="bg-white/50 p-1 rounded"><i data-lucide="message-circle" class="w-5 h-5"></i></div>
+                                <div>
+                                    <span class="font-bold block text-lg">Sit & Chat</span>
+                                    <span class="text-base opacity-75">"Let's recover."</span>
+                                </div>
+                            </button>
+
+                            <button onclick="setActivity('walk')" class="pixel-btn bg-purple-200 hover:bg-purple-100 text-purple-900 text-xl p-3 flex items-center gap-3 text-left">
+                                <div class="bg-white/50 p-1 rounded"><i data-lucide="footprints" class="w-5 h-5"></i></div>
+                                <div>
+                                    <span class="font-bold block text-lg">Walk & Talk</span>
+                                    <span class="text-base opacity-75">"Let's look around."</span>
+                                </div>
+                            </button>
+
+                            <button onclick="setActivity('fight')" class="pixel-btn bg-red-200 hover:bg-red-100 text-red-900 text-xl p-3 flex items-center gap-3 text-left">
+                                <div class="bg-white/50 p-1 rounded"><i data-lucide="sword" class="w-5 h-5"></i></div>
+                                <div>
+                                    <span class="font-bold block text-lg">Fight & Bite!</span>
+                                    <span class="text-base opacity-75">"I have energy!"</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // STEP 3: RESULT
+            else if (state.step === 3) {
+                const result = getResult();
+                const ideasHtml = result.ideas.map(idea => `<li class="text-lg text-slate-800 leading-tight">${idea}</li>`).join('');
+                
+                html = `
+                    <div class="w-full animate-fade-in">
+                        <div class="bg-white border-4 border-slate-800 p-4 shadow-xl rotate-1 transform transition-transform hover:rotate-0">
+                            <h2 class="text-3xl font-bold text-slate-800 mb-2 border-b-2 border-slate-200 pb-1">
+                                RESULT
+                            </h2>
+                            <p class="text-xl text-pink-500 font-bold mb-2 uppercase tracking-wider leading-none">
+                                ${result.title}
+                            </p>
+                            
+                            <div class="bg-yellow-50 p-3 border-2 border-yellow-200 text-left mt-2">
+                                <p class="text-xs text-yellow-700 font-bold uppercase mb-1">Quest:</p>
+                                <ul class="list-disc pl-4 space-y-1">
+                                    ${ideasHtml}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button onclick="restart()" class="mt-6 flex items-center justify-center gap-2 mx-auto text-lg text-slate-500 hover:text-slate-800 transition-colors">
+                            <i data-lucide="refresh-ccw" class="w-5 h-5"></i> Play Again
+                        </button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            lucide.createIcons(); // Re-initialize icons for new content
+        }
+
+        // Initialize
+        render();
+
+    </script>
+</body>
+</html>
