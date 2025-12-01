@@ -98,7 +98,8 @@
         const state = {
             step: 0,
             path: null,    // 'indoors' | 'outdoors'
-            activity: null // 'sit' | 'walk' | 'fight'
+            activity: null, // 'sit' | 'walk' | 'fight'
+            noteOpen: false
         };
 
         // --- LOGIC ---
@@ -159,6 +160,17 @@
             state.step = 0;
             state.path = null;
             state.activity = null;
+            state.noteOpen = false;
+            render();
+        }
+
+        function openNote() {
+            state.noteOpen = true;
+            render();
+        }
+
+        function closeNote() {
+            state.noteOpen = false;
             render();
         }
 
@@ -293,7 +305,7 @@
                 const ideasHtml = result.ideas.map(idea => `<li class="text-lg text-slate-800 leading-tight">${idea}</li>`).join('');
                 
                 html = `
-                    <div class="w-full animate-fade-in">
+                    <div class="w-full animate-fade-in relative">
                         <div class="bg-white border-4 border-slate-800 p-4 shadow-xl rotate-1 transform transition-transform hover:rotate-0">
                             <h2 class="text-3xl font-bold text-slate-800 mb-2 border-b-2 border-slate-200 pb-1">
                                 RESULT
@@ -310,9 +322,30 @@
                             </div>
                         </div>
 
-                        <button onclick="restart()" class="mt-6 flex items-center justify-center gap-2 mx-auto text-lg text-slate-500 hover:text-slate-800 transition-colors">
-                            <i data-lucide="refresh-ccw" class="w-5 h-5"></i> Play Again
-                        </button>
+                        <div class="flex gap-4 justify-center mt-6">
+                            <button onclick="openNote()" class="pixel-btn bg-yellow-200 hover:bg-yellow-100 text-yellow-900 px-4 py-2 text-xl flex items-center gap-2">
+                                <i data-lucide="sticky-note" class="w-5 h-5"></i> Read Note
+                            </button>
+                            <button onclick="restart()" class="flex items-center justify-center gap-2 text-lg text-slate-500 hover:text-slate-800 transition-colors">
+                                <i data-lucide="refresh-ccw" class="w-5 h-5"></i> Play Again
+                            </button>
+                        </div>
+
+                        ${state.noteOpen ? `
+                            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in" onclick="closeNote()">
+                                <div class="bg-[#fef3c7] max-w-md w-full p-8 rotate-1 shadow-2xl relative pixel-box text-slate-800" onclick="event.stopPropagation()">
+                                    <button onclick="closeNote()" class="absolute top-2 right-2 text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-6 h-6"></i>
+                                    </button>
+                                    <h3 class="text-3xl font-bold mb-4 text-center border-b-2 border-yellow-600/20 pb-2">To Amber</h3>
+                                    <p class="text-xl leading-relaxed mb-4">
+                                        I hope you like the date ideas. But you could add more ideas too honestly. Theres alot more ideas if you choose different answers so feel free to try again! . <br/>
+                                        Lowkey tell me what kind of date you want to go on too, im open to trying new things.
+                                    </p>
+                                    <p class="text-right text-lg italic opacity-75">- Thomas</p>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
             }
