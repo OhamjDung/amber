@@ -107,7 +107,7 @@
                 if (state.activity === 'sit') return {
                     title: "The Cozy Gamer Cave",
                     desc: "You chose maximum comfort and safety.",
-                    ideas: ["Minecraft Date Night", "FNAF Movie or JJK Movie"]
+                    ideas: ["Minecraft Date Night", "FNAF Movie or JJK Movie","Roblox Night", "Boardgames"]
                 };
                 if (state.activity === 'walk') return {
                     title: "The Creative Explorer",
@@ -117,7 +117,7 @@
                 if (state.activity === 'fight') return {
                     title: "The Indoor Party Animal",
                     desc: "You have energy to burn, but refuse to freeze.",
-                    ideas: ["Mexican Dance Learning", "Karaoke Night"]
+                    ideas: ["Mexican Dance Learning", "Karaoke Night","Trampoline Park"]
                 };
             } else { // Outdoors
                 if (state.activity === 'sit') return {
@@ -128,12 +128,12 @@
                 if (state.activity === 'walk') return {
                     title: "The Frosty Stroller",
                     desc: "A romantic walk, hands in pockets.",
-                    ideas: ["Walking Around the Park", "Undecided / Cafe Hop"]
+                    ideas: ["Walking Around the Park", "Cafe Hop", "Bookstore", "Shopping"]
                 };
                 if (state.activity === 'fight') return {
                     title: "The Elemental Champion",
                     desc: "You want to heat up by moving fast!",
-                    ideas: ["Volleyball Date", "Kids Playground (Heights/Arapaho)", "Tennis"]
+                    ideas: ["Volleyball Date", "Kids Playground", "Tennis"]
                 };
             }
             return { title: "The Mystery", desc: "Something went wrong in the dream space!", ideas: [] };
